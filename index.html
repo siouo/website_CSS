@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楊珮湉's website </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil:opsz,wght@10..72,100..900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f0f4f8;
+            color: #2E5266;
+        }
+
+        /* 調整導航欄內的 H1 樣式 */
+        .navbar-brand h1 {
+            font-family: "Big Shoulders Stencil", sans-serif;
+            font-weight: 1000;
+            font-size: 1.5rem;
+            /* 調整大小 */
+            color: #2E5266;
+            line-height: 1.2;
+        }
+
+        /* ... 其他樣式保持不變 ... */
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .project-card {
+            max-width: 900px;
+            /* 設定最大寬度，讓它不會佔滿整個螢幕 */
+            margin: 0 auto;
+            /* 關鍵：讓區塊在容器中居中 */
+            border-radius: 15px;
+            overflow: hidden;
+            border: 8px solid #8bd3dd;
+            /* 使用您之前的邊框樣式 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            /* 增加一些陰影 */
+            padding: 30px;
+            /* 增加內部邊距 */
+            background-color: #fff;
+            /* 背景色 */
+        }
+
+        .project-content-wrapper {
+            display: flex;
+            /* 確保 Flexbox 啟動 */
+            align-items: center;
+            /* 垂直居中 */
+            gap: 40px;
+
+            /* 顯式設定為 row，確保它不會被其他樣式覆蓋 */
+            flex-direction: row;
+            flex-wrap: nowrap;
+            /* 確保內容不換行，除非被強制 */
+        }
+
+        /* 左側圖片區域 */
+        .project-image-area {
+            flex-basis: 500px;
+            /* 圖片區域的基礎寬度 */
+            flex-shrink: 0;
+            /* 防止圖片區域被壓縮 */
+            max-width: 50%;
+            /* 確保在大螢幕上圖片不超過一半寬度 */
+        }
+
+        .project-image-area img {
+            width: 100%;
+            /* 圖片填滿其容器 */
+            height: auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-photo-area img {
+            width: 150px;
+            /* 圖片的實際大小 */
+            height: 150px;
+            object-fit: cover;
+            /* 確保圖片不變形 */
+            border: 5px solid #8bd3dd;
+            /* 圖片邊框 */
+        }
+
+        /* 右側文字區 */
+        .project-text-area {
+            flex-grow: 1;
+            /* 佔據所有剩餘空間 */
+            text-align: left;
+            /* 確保文字靠左對齊 */
+        }
+
+        /* 針對 meproject-card 的主體樣式 */
+        .meproject-card {
+            max-width: 900px;
+            /* 設定最大寬度，讓它不會佔滿整個螢幕 */
+            margin: 0 auto;
+            /* 關鍵：讓區塊在容器中居中 */
+            border-radius: 15px;
+            overflow: hidden;
+            border: 8px solid #8bd3dd;
+            /* 使用您之前的邊框樣式 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            /* 增加一些陰影 */
+            padding: 30px;
+            /* 增加內部邊距 */
+            background-color: #fff;
+            /* 背景色 */
+        }
+
+        /* meproject-card 內部的左右兩欄佈局 */
+        .meproject-content {
+            display: flex;
+            /* 確保 Flexbox 啟動 */
+            align-items: center;
+            /* 垂直居中 */
+            gap: 40px;
+
+            /* 顯式設定為 row，確保它不會被其他樣式覆蓋 */
+            flex-direction: row;
+            flex-wrap: nowrap;
+            /* 確保內容不換行，除非被強制 */
+        }
+
+        /* 左側圖片區 */
+        .meproject-photo-area {
+            flex-basis: 200px;
+            /* 圖片區的基礎寬度 */
+            flex-shrink: 0;
+            /* 防止圖片區被壓縮 */
+            text-align: center;
+        }
+
+        .meproject-photo-area img {
+            width: 150px;
+            /* 圖片的實際大小 */
+            height: 150px;
+            object-fit: cover;
+            /* 確保圖片不變形 */
+            border: 5px solid #8bd3dd;
+            /* 圖片邊框 */
+        }
+
+        /* 右側文字區 */
+        .meproject-text-area {
+            flex-grow: 1;
+            /* 佔據所有剩餘空間 */
+            text-align: left;
+            /* 確保文字靠左對齊 */
+        }
+
+        /* 小螢幕響應式調整 */
+        @media (max-width: 768px) {
+            .meproject-content {
+                flex-direction: column;
+                /* 小螢幕時改為垂直堆疊 */
+                text-align: center;
+                /* 文字居中 */
+            }
+
+            .meproject-photo-area {
+                flex-basis: auto;
+                /* 取消固定寬度 */
+                margin-bottom: 20px;
+            }
+        }
+
+        a {
+            color: #ef4565;
+            /* 範例：使用您之前卡片連結的粉紅色 */
+            text-decoration: none;
+            /* 移除底線 (如果需要) */
+        }
+
+        /* 設定滑鼠移上去時的顏色 */
+        a:hover {
+            color: #ff99aa;
+            /* 範例：滑鼠移上去時變淺 */
+            text-decoration: underline;
+            /* 懸停時顯示底線 */
+        }
+
+        /* 確保詳細資訊區塊的背景和邊框 */
+        .detail-block {
+            background-color: white;
+            /* 白色背景 */
+            border-color: #8bd3dd !important;
+            /* 邊框顏色 */
+            border-width: 8px !important;
+            /* 邊框粗細 */
+            padding: 40px;
+            /* 增加內邊距 */
+        }
+
+        /* 響應式調整：小螢幕時將圖片和文字垂直堆疊 */
+        @media (max-width: 992px) {
+
+            /* 在中等螢幕以下開始堆疊 */
+            .project-content-wrapper {
+                flex-direction: column;
+                /* 垂直堆疊 */
+                align-items: center;
+                /* 居中對齊 */
+                text-align: center;
+                /* 文字居中 */
+            }
+
+            .project-image-area {
+                max-width: 80%;
+                /* 圖片佔大部分寬度 */
+                margin-bottom: 25px;
+                /* 圖片下方留空 */
+                flex-basis: auto;
+                /* 取消固定寬度 */
+            }
+
+            .project-text-area {
+                text-align: center;
+                /* 小螢幕下文字居中 */
+            }
+
+            .project-text-area ul {
+                text-align: left;
+                /* 列表項目保持靠左 */
+                margin-left: auto;
+                margin-right: auto;
+                max-width: 80%;
+                /* 限制列表寬度 */
+            }
+        }
+
+        .big-shoulders-stencil-caption {
+            font-family: "Big Shoulders Stencil", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 600;
+            font-style: normal;
+            color: #2E5266
+        }
+
+        .big-shoulders-stencil-maincontent {
+            font-family: "Big Shoulders Stencil", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 1000;
+            font-style: normal;
+            color: #6E8898
+        }
+    </style>
+
+</head>
+
+<body class="big-shoulders-stencil-maincontent">
+
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="assert/logosiouo.png" alt="Website Logo" style="height: 70px;">
+                <h1 class="mb-0 ms-3">楊珮湉's Website</h1>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#about">關於我</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#projects">作品集</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">聯絡我</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="meproject-card bg-light p-4">
+            <div class="meproject-content">
+                <div class="meproject-photo-area">
+                    <img src="assert/q版平菇sample.jpg" alt="我的個人照片" class="img-fluid rounded-circle">
+                </div>
+
+                <div class="meproject-text-area">
+                    <h5>關於我</h5>
+                    <p class="text-muted">就讀於國北教資科系</p>
+                    <p class="text-muted">目前沒有甚麼偉大目標的人類ˊˇˋ</p>
+                    <p class="text-muted">平時喜歡看影片，喜歡可愛的小生物</p>
+                    <p class="text-muted">以下是多媒體的眾多作業，加上我一些的生活分享(?</p>
+                    <p class="text-muted">點擊下方框框會自動移動置詳細作品內容</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <a href="#project-detail-1" class="card-link">
+                    <div class="project-card bg-light text-center p-2">
+                        <h5>2025/09/15作品</h5>
+                        <p>我的礁島想像</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <a href="#project-detail-2" class="card-link">
+                    <div class="project-card bg-light text-center p-2">
+                        <h5>2025/09/22作品</h5>
+                        <p>特色字母表</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <a href="#project-detail-3" class="card-link">
+                    <div class="project-card bg-light text-center p-2">
+                        <h5>2025/09/22作品</h5>
+                        <p>廣告文案</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <a href="#project-detail-4" class="card-link">
+                    <div class="project-card bg-light text-center p-2">
+                        <h5>2025/10/13作品</h5>
+                        <p>AIVA AI 音樂</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/10/20作品</h5>
+                    <p>Suno AI 音樂</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/11/10作品</h5>
+                    <p>網頁開發工具</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/11/17作品</h5>
+                    <p>網頁開發練習</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/11/24作品</h5>
+                    <p>新人報到表單</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2004/09/13-至今</h5>
+                    <p>自己沒事拍的貓貓照</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/00/00</h5>
+                    <p>還沒想好</p>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 mb-4">
+                <div class="project-card bg-light text-center p-2">
+                    <h5>2025/00/00</h5>
+                    <p>還沒想好</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5 project-details-section">
+
+        <div id="project-detail-1" class="detail-block p-4 mb-5 border rounded">
+
+            <div class="project-content-wrapper mb-5">
+                <div class="project-image-area me-4 mb-4 mb-md-0">
+                    <img src="assert/0915.png" alt="我的礁島想像" class="img-fluid">
+                </div>
+
+                <div class="project-text-area">
+                    <h2>09/15</h2>
+                    <h2>作品一：我的島嶼想像-小動畫</h2>
+                    <p><b>作品說明：</b>使用 Gemini (Nano Banana 模型)，根據自己的想像撰寫 Prompt</p>
+                    <p>這個項目...</p>
+                    <ul>
+                        <li>靈感來源：自然奇觀、奇幻小說</li>
+                        <li>主要工具：Gemini AI 繪圖模型</li>
+                        <li>挑戰：精確控制 AI 輸出的風格和元素</li>
+                    </ul>
+                    <a href="#" class="btn btn-info text-white mt-3">前往作品連結</a>
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+            <div class="project-content-wrapper">
+
+                <div class="project-image-area me-4 mb-4 mb-md-0">
+                    <img src="assert/091502.png" alt="我的礁島想像" class="img-fluid">
+                </div>
+
+                <div class="project-text-area">
+                    <h2>09/15</h2>
+                    <h2>作品二：我的島嶼想像-賽博龐克</h2>
+                    <p><b>作品說明：</b>使用 Gemini (Nano Banana 模型)，根據自己的想像撰寫 Prompt</p>
+                    <p>這個項目...</p>
+                    <ul>
+                        <li>靈感來源：全球汙染、科幻小說</li>
+                        <li>主要工具：Gemini AI 繪圖模型</li>
+                        <li>挑戰：精確控制 AI 輸出的風格和元素</li>
+                    </ul>
+                    <a href="#" class="btn btn-info text-white mt-3">前往作品連結</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="project-detail-2" class="detail-block p-4 mb-5 border rounded">
+
+            <div class="project-content-wrapper mb-5">
+                <div class="project-image-area me-4 mb-4 mb-md-0">
+                    <img src="assert/0922a.png" alt="特色字母表" class="img-fluid">
+                </div>
+
+                <div class="project-text-area">
+                    <h2>09/22</h2>
+                    <h2>作品一：特色字母表</h2>
+                    <p><b>作品說明：</b>使用Google GenType，根據自己的想像撰寫 Prompt</p>
+                    <p>這個項目...</p>
+                    <ul>
+                        <li>靈感來源：泡泡瑪特風格(奇幻、少女)</li>
+                        <li>主要工具：Google GenType AI 繪圖模型</li>
+                        <li>挑戰：精確控制 AI 輸出的風格和元素</li>
+                    </ul>
+                    <a href="#" class="btn btn-info text-white mt-3">前往作品連結</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="project-detail-3" class="detail-block p-4 mb-5 border rounded">
+
+            <div class="project-content-wrapper mb-5">
+                <div class="project-image-area me-4 mb-4 mb-md-0">
+                    <img src="assert/0922fox.png" alt="商案" class="img-fluid">
+                </div>
+
+                <div class="project-text-area">
+                    <h2>09/22</h2>
+                    <h2>作品一：AI商品到廣告文案</h2>
+                    <p><b>作品說明：</b>使用Gemini Nano Banana用於生成商品圖片且根據自己的想像撰寫Prompt
+                        Gemini用於生成廣告文案，PowerPoint用於整理商品與文案，做成一張廣告海報或簡報</p>
+                    <p>這個項目...</p <ul>
+                    <li>靈感來源：最近很喜歡狐狸曾經有看過一款狐狸娃娃覺得很可愛</li>
+                    <li>主要工具：Gemini Nano Banana繪圖模型</li>
+                    <li>挑戰：精確控制 AI 輸出的風格和元素</li>
+                    </ul>
+                    <a href="#" class="btn btn-info text-white mt-3">前往作品連結</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="project-detail-4" class="detail-block p-4 mb-5 border rounded">
+
+            <div class="project-content-wrapper mb-5">
+                <div class="project-image-area me-4 mb-4 mb-md-0">
+                    <img src="assert/0922fox.png" alt="商案" class="img-fluid">
+                </div>
+
+                <div class="project-text-area"> /*還沒改*/
+                    <h2>10/13</h2>
+                    <h2>作品一：AI商品到廣告文案</h2>
+                    <p><b>作品說明：</b>使用Gemini Nano Banana用於生成商品圖片且根據自己的想像撰寫Prompt
+                        Gemini用於生成廣告文案，PowerPoint用於整理商品與文案，做成一張廣告海報或簡報</p>
+                    <p>這個項目...</p <ul>
+                    <li>靈感來源：最近很喜歡狐狸曾經有看過一款狐狸娃娃覺得很可愛</li>
+                    <li>主要工具：Gemini Nano Banana繪圖模型</li>
+                    <li>挑戰：精確控制 AI 輸出的風格和元素</li>
+                    </ul>
+                    <a href="#" class="btn btn-info text-white mt-3">前往作品連結</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <footer class="bg-dark text-white text-center py-3">
+        © 2025 Siouo's Website. All rights reserved.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
