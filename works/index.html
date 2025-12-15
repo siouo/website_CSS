@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>女巫的煉金考核 | Witch's Alchemy Challenge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Serif+TC:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #1a0b2e;
+            color: #e2d8f0;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- 視覺特效 --- */
+        .magic-bg {
+            background-image: radial-gradient(circle at 50% 50%, #2d1b4e 0%, #1a0b2e 100%);
+        }
+
+        /* 鍋爐液體 */
+        .cauldron-liquid {
+            background: linear-gradient(180deg, #4ade80 0%, #166534 100%);
+            box-shadow: 0 0 30px #4ade80, inset 0 0 20px rgba(0,0,0,0.5);
+            animation: pulse-liquid 3s infinite alternate;
+            transition: all 0.5s ease;
+        }
+
+        .liquid-success {
+            background: linear-gradient(180deg, #ec4899 0%, #be185d 100%) !important;
+            box-shadow: 0 0 50px #f472b6 !important;
+        }
+
+        @keyframes pulse-liquid {
+            0% { transform: scaleY(0.98); }
+            100% { transform: scaleY(1.02); }
+        }
+
+        /* 氣泡 */
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: rise 4s infinite ease-in;
+            bottom: -10px;
+        }
+
+        @keyframes rise {
+            0% { bottom: 0%; opacity: 0; transform: translateY(0) scale(0.5); }
+            50% { opacity: 1; }
+            100% { bottom: 100%; opacity: 0; transform: translateY(-20px) scale(1.2); }
+        }
+
+        /* 材料架按鈕樣式 */
+        .ingredient-btn {
+            transition: all 0.2s;
+        }
+        .ingredient-btn:active {
+            transform: scale(0.9);
+        }
+        .ingredient-btn.selected {
+            transform: scale(0.95);
+            filter: grayscale(0);
+        }
+        .ingredient-btn.selected .icon-box {
+            border-color: #4ade80;
+            box-shadow: 0 0 15px #4ade80;
+            background-color: rgba(74, 222, 128, 0.2);
+        }
+        .ingredient-btn.selected::after {
+            opacity: 1;
+        }
+
+        .ingredient-btn::after {
+            content: "放入";
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #22c55e;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+
+        /* 鍋中物品動畫 */
+        .pot-item {
+            opacity: 0;
+            transform: translateY(-50px) scale(0);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .pot-item.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: float-bob 3s ease-in-out infinite 0.4s;
+        }
+
+        @keyframes float-bob {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* 倒數計時條 */
+        .timer-bar {
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body class="magic-bg h-screen w-screen flex flex-col items-center justify-between overflow-hidden relative">
+
+    <!-- 作者署名 (移至左上角，調整對齊方式) -->
+    <div class="fixed top-3 left-3 z-[60] flex flex-col items-start pointer-events-none opacity-80">
+        <div class="text-yellow-400 font-bold text-sm md:text-base font-serif drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-wider">
+            Designed by 楊珮湉
+        </div>
+    </div>
+
+    <!-- 頂部資訊列 (分數與時間) -->
+    <div class="w-full flex justify-between items-start p-4 z-20">
+        <!-- 分數板 (增加 mt-6 以避開上方的名字) -->
+        <div class="bg-black/50 border-2 border-purple-500 rounded-xl p-3 backdrop-blur-sm min-w-[120px] mt-6">
+            <div class="text-xs text-purple-300 uppercase tracking-widest">Score</div>
+            <div class="text-3xl font-bold text-yellow-400 font-serif" id="score-display">0</div>
+        </div>
+
+        <!-- 倒數計時器 (移除之前的 pr-20，因為名字不在右邊了) -->
+        <div class="flex flex-col items-end w-1/3">
+            <div class="text-xs text-purple-300 uppercase tracking-widest mb-1">Time Left</div>
+            <div class="w-full h-4 bg-gray-800 rounded-full border border-gray-600 overflow-hidden relative">
+                <div id="timer-bar" class="timer-bar h-full bg-gradient-to-r from-green-500 to-yellow-500 w-full"></div>
+            </div>
+            <div id="timer-text" class="text-xl font-bold text-white mt-1">60s</div>
+        </div>
+    </div>
+
+    <!-- 訂單卷軸 (顯示當前目標) -->
+    <div class="absolute top-24 md:top-20 left-1/2 transform -translate-x-1/2 z-10 w-full max-w-sm px-4 pointer-events-none">
+        <div class="bg-[#f3e5ab] text-[#4a3b2a] px-4 py-3 md:px-6 md:py-4 rounded shadow-[0_10px_30px_rgba(0,0,0,0.5)] border-4 border-[#8b4513] relative transform rotate-1 transition-all duration-300 scale-90 md:scale-100 origin-top" id="order-card">
+            <!-- 釘子 -->
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-gray-800 border-2 border-gray-500"></div>
+            
+            <div class="flex justify-between items-center border-b-2 border-[#8b4513]/30 pb-2 mb-2">
+                <h2 class="font-bold text-lg font-serif">Current Order</h2>
+                <span class="bg-red-800 text-white text-xs px-2 py-1 rounded" id="order-difficulty">Normal</span>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <div class="text-xl md:text-2xl font-bold text-purple-900 mb-2 font-serif" id="target-name">準備中...</div>
+                
+                <!-- 配方圖示區 -->
+                <div class="flex gap-3 bg-black/10 px-4 py-2 rounded-lg" id="target-recipe-icons">
+                    <!-- JS 生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 鍋爐區域 -->
+    <div class="relative flex-grow flex items-center justify-center w-full z-0 mt-32 md:mt-24">
+        <div class="relative w-64 h-64 md:w-80 md:h-80 transition-all duration-300">
+            <!-- 鍋邊 -->
+            <div class="absolute inset-0 rounded-full bg-gray-800 border-8 border-gray-600 shadow-2xl z-20"></div>
+            
+            <!-- 液體 -->
+            <div id="cauldron-liquid" class="cauldron-liquid absolute top-4 left-4 right-4 bottom-4 rounded-full overflow-hidden z-10">
+                <!-- 氣泡 JS 生成 -->
+            </div>
+
+            <!-- 裝飾 -->
+            <div class="absolute top-1/2 -left-4 w-8 h-16 bg-gray-700 rounded-l-lg z-0"></div>
+            <div class="absolute top-1/2 -right-4 w-8 h-16 bg-gray-700 rounded-r-lg z-0"></div>
+            <div class="absolute -bottom-4 left-10 w-8 h-12 bg-gray-800 rounded-b-lg -z-10 transform -rotate-12"></div>
+            <div class="absolute -bottom-4 right-10 w-8 h-12 bg-gray-800 rounded-b-lg -z-10 transform rotate-12"></div>
+
+            <!-- 鍋內物品顯示 -->
+            <div class="absolute inset-0 z-30 flex items-center justify-center flex-wrap p-12 gap-2 pointer-events-none" id="pot-contents">
+                <div class="pot-item text-4xl drop-shadow-md" data-id="mushroom">🍄</div>
+                <div class="pot-item text-4xl drop-shadow-md" data-id="eye">👁️</div>
+                <div class="pot-item text-4xl drop-shadow-md" data-id="leaf">🌿</div>
+                <div class="pot-item text-4xl drop-shadow-md" data-id="crystal">💎</div>
+                <div class="pot-item text-4xl drop-shadow-md" data-id="bone">🦴</div>
+                <div class="pot-item text-4xl drop-shadow-md" data-id="star">✨</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示特效 (全螢幕) -->
+    <div id="success-flash" class="fixed inset-0 bg-yellow-400/30 z-40 pointer-events-none opacity-0 transition-opacity duration-300"></div>
+    <div id="success-msg" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-5xl md:text-7xl z-50 pointer-events-none opacity-0 transition-all duration-500 scale-50 font-bold text-yellow-300 drop-shadow-[0_0_10px_rgba(0,0,0,1)]">
+        Perfect!
+    </div>
+
+    <!-- 材料架 -->
+    <div class="w-full max-w-4xl bg-black/60 backdrop-blur-xl p-4 md:p-6 rounded-t-3xl border-t border-purple-500/50 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div class="text-center text-purple-300 text-xs mb-3 tracking-widest uppercase">Select Ingredients</div>
+        
+        <div class="flex flex-wrap justify-center gap-3 md:gap-6" id="shelf-container">
+            <!-- 按鈕由 JS 生成 -->
+        </div>
+
+        <div class="w-full flex justify-center mt-4">
+            <button onclick="resetPot()" class="flex items-center gap-2 text-red-400 hover:text-red-100 border border-red-900/50 hover:bg-red-900/50 px-6 py-2 rounded-full text-sm transition-all cursor-pointer hover:shadow-[0_0_10px_rgba(239,68,68,0.4)] active:scale-95">
+                <span>↻</span> 清空鍋爐 (Reset)
+            </button>
+        </div>
+    </div>
+
+    <!-- 遊戲開始/結束 遮罩 -->
+    <div id="game-overlay" class="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center p-8 text-center transition-opacity duration-500">
+        <h1 class="text-4xl md:text-6xl font-bold text-yellow-500 mb-4 font-serif drop-shadow-lg">Witch's Alchemy Exam</h1>
+        <p class="text-purple-200 text-lg mb-8 max-w-md leading-relaxed">
+            你將面臨一分鐘的煉金考核。<br>
+            根據上方的訂單，選擇正確的材料。<br>
+            完成越多訂單，分數越高！
+        </p>
+        
+        <!-- 開始按鈕 -->
+        <button onclick="startGame()" class="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg text-white font-bold text-xl shadow-[0_0_20px_rgba(124,58,237,0.5)] transition-all hover:scale-105 active:scale-95">
+            <span class="relative z-10">開始考核 (Start 60s)</span>
+            <div class="absolute inset-0 bg-white/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        </button>
+
+        <!-- 結束時顯示分數 -->
+        <div id="final-score-area" class="hidden mt-8">
+            <div class="text-2xl text-white mb-2">考核結束</div>
+            <div class="text-6xl font-bold text-yellow-400 mb-4" id="final-score">0</div>
+            <p class="text-gray-400 italic" id="final-rank">見習學徒</p>
+        </div>
+    </div>
+
+    <script>
+        // --- 遊戲設定資料 ---
+        const ingredientsData = [
+            { id: 'mushroom', icon: '🍄', name: '毒蘑菇' },
+            { id: 'eye', icon: '👁️', name: '蠑螈眼' },
+            { id: 'leaf', icon: '🌿', name: '月光草' },
+            { id: 'crystal', icon: '💎', name: '水晶' },
+            { id: 'bone', icon: '🦴', name: '骨粉' },
+            { id: 'star', icon: '✨', name: '星塵' }
+        ];
+
+        // 藥水配方表
+        const recipes = [
+            { name: "隱形藥水", ids: ["crystal", "star"] }, // 透明 + 光
+            { name: "補血藥", ids: ["leaf", "mushroom"] }, // 生命 + 菌
+            { name: "大力藥劑", ids: ["bone", "eye"] }, // 骨 + 眼
+            { name: "複方湯藥", ids: ["leaf", "eye", "bone"] }, // 變身複雜
+            { name: "福靈劑", ids: ["star", "crystal", "leaf"] }, // 幸運金光
+            { name: "吐真劑", ids: ["eye", "mushroom", "crystal"] }, // 看清真相
+            { name: "迷惑劑", ids: ["mushroom", "bone", "star"] }, // 混亂
+            { name: "回憶藥水", ids: ["crystal", "eye", "star"] }, // 記憶重現
+            { name: "除草劑", ids: ["leaf", "bone", "mushroom"] }, // 枯萎
+            { name: "幻視藥水", ids: ["mushroom", "star", "leaf"] } // 致幻
+        ];
+
+        // --- 遊戲狀態變數 ---
+        let currentScore = 0;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let currentTarget = null;
+        let selectedIngredients = new Set(); // 使用 Set 儲存當前選中的材料 ID
+        let isGameActive = false;
+
+        // --- 初始化 ---
+        window.onload = () => {
+            renderShelf();
+            createBubbles();
+        };
+
+        // 渲染材料按鈕
+        function renderShelf() {
+            const container = document.getElementById('shelf-container');
+            container.innerHTML = '';
+            ingredientsData.forEach(ing => {
+                const btn = document.createElement('div');
+                btn.className = 'ingredient-btn group flex flex-col items-center cursor-pointer select-none relative w-16 md:w-20';
+                btn.onclick = () => toggleIngredient(ing.id, btn);
+                btn.innerHTML = `
+                    <div class="icon-box w-14 h-14 md:w-16 md:h-16 bg-gray-800/80 rounded-xl flex items-center justify-center text-3xl md:text-4xl border-2 border-gray-600 transition-all mb-1">
+                        ${ing.icon}
+                    </div>
+                    <span class="text-[10px] md:text-xs text-purple-200">${ing.name}</span>
+                `;
+                btn.dataset.ingId = ing.id; // 方便查找
+                container.appendChild(btn);
+            });
+        }
+
+        // 氣泡背景動畫
+        function createBubbles() {
+            const liquid = document.getElementById('cauldron-liquid');
+            setInterval(() => {
+                const b = document.createElement('div');
+                b.className = 'bubble';
+                const size = Math.random() * 15 + 5;
+                b.style.width = `${size}px`;
+                b.style.height = `${size}px`;
+                b.style.left = `${Math.random() * 80 + 10}%`;
+                b.style.animationDuration = `${Math.random() * 2 + 2}s`;
+                liquid.appendChild(b);
+                setTimeout(() => b.remove(), 4000);
+            }, 500);
+        }
+
+        // --- 遊戲邏輯 ---
+
+        function startGame() {
+            isGameActive = true;
+            currentScore = 0;
+            timeLeft = 60;
+            selectedIngredients.clear();
+            
+            // UI 重置
+            document.getElementById('score-display').innerText = "0";
+            document.getElementById('timer-bar').style.width = "100%";
+            document.getElementById('timer-bar').classList.remove('bg-red-500');
+            document.getElementById('game-overlay').style.opacity = "0";
+            document.getElementById('final-score-area').classList.add('hidden');
+            setTimeout(() => document.getElementById('game-overlay').style.display = "none", 500);
+
+            resetPotUI();
+            nextOrder();
+
+            // 計時器
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameActive = false;
+            clearInterval(timerInterval);
+            
+            const overlay = document.getElementById('game-overlay');
+            overlay.style.display = "flex";
+            setTimeout(() => overlay.style.opacity = "1", 10);
+            
+            // 顯示結算
+            document.getElementById('final-score-area').classList.remove('hidden');
+            document.getElementById('final-score').innerText = currentScore;
+            
+            let rank = "見習學徒";
+            if (currentScore >= 150) rank = "傳奇大女巫";
+            else if (currentScore >= 100) rank = "魔藥大師";
+            else if (currentScore >= 50) rank = "熟練工匠";
+            document.getElementById('final-rank').innerText = `稱號: ${rank}`;
+        }
+
+        function updateTimerUI() {
+            document.getElementById('timer-text').innerText = `${timeLeft}s`;
+            const percentage = (timeLeft / 60) * 100;
+            const bar = document.getElementById('timer-bar');
+            bar.style.width = `${percentage}%`;
+            
+            if (timeLeft < 10) {
+                bar.classList.remove('from-green-500', 'to-yellow-500');
+                bar.classList.add('bg-red-500');
+            }
+        }
+
+        function nextOrder() {
+            // 隨機選一個配方
+            currentTarget = recipes[Math.floor(Math.random() * recipes.length)];
+            
+            // 更新 UI
+            document.getElementById('target-name').innerText = currentTarget.name;
+            const iconContainer = document.getElementById('target-recipe-icons');
+            iconContainer.innerHTML = '';
+            
+            currentTarget.ids.forEach(id => {
+                const ing = ingredientsData.find(i => i.id === id);
+                const span = document.createElement('span');
+                span.className = 'text-2xl animate-bounce';
+                span.innerText = ing.icon;
+                iconContainer.appendChild(span);
+            });
+
+            // 難度標籤
+            const badge = document.getElementById('order-difficulty');
+            if (currentTarget.ids.length === 2) {
+                badge.innerText = "Easy";
+                badge.className = "bg-green-600 text-white text-xs px-2 py-1 rounded";
+            } else {
+                badge.innerText = "Hard";
+                badge.className = "bg-red-800 text-white text-xs px-2 py-1 rounded";
+            }
+        }
+
+        // --- 互動邏輯 ---
+
+        function toggleIngredient(id, btnElement) {
+            if (!isGameActive) return;
+
+            // 狀態切換
+            if (selectedIngredients.has(id)) {
+                selectedIngredients.delete(id);
+                btnElement.classList.remove('selected');
+                togglePotItem(id, false);
+            } else {
+                // 如果已經滿了 (簡單起見，我們不設上限，但配方最多3個)
+                selectedIngredients.add(id);
+                btnElement.classList.add('selected');
+                togglePotItem(id, true);
+            }
+
+            checkRecipe();
+        }
+
+        function togglePotItem(id, show) {
+            const item = document.querySelector(`.pot-item[data-id="${id}"]`);
+            if (show) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        }
+
+        function resetPot() {
+            selectedIngredients.clear();
+            resetPotUI();
+        }
+
+        function resetPotUI() {
+            // 移除所有按鈕的選取狀態
+            document.querySelectorAll('.ingredient-btn').forEach(btn => btn.classList.remove('selected'));
+            // 隱藏鍋中所有物品
+            document.querySelectorAll('.pot-item').forEach(item => item.classList.remove('active'));
+            // 重置液體顏色
+            document.getElementById('cauldron-liquid').classList.remove('liquid-success');
+        }
+
+        // 核心：檢查配方
+        function checkRecipe() {
+            if (!currentTarget) return;
+
+            // 1. 數量必須一致
+            if (selectedIngredients.size !== currentTarget.ids.length) return;
+
+            // 2. 內容必須完全包含
+            const currentArray = Array.from(selectedIngredients);
+            const isMatch = currentTarget.ids.every(id => selectedIngredients.has(id));
+
+            if (isMatch) {
+                handleSuccess();
+            }
+        }
+
+        function handleSuccess() {
+            // 加分
+            currentScore += 10;
+            document.getElementById('score-display').innerText = currentScore;
+
+            // 視覺特效
+            const liquid = document.getElementById('cauldron-liquid');
+            liquid.classList.add('liquid-success');
+
+            const flash = document.getElementById('success-flash');
+            const msg = document.getElementById('success-msg');
+            
+            flash.style.opacity = "1";
+            msg.style.opacity = "1";
+            msg.style.transform = "translate(-50%, -50%) scale(1.2)";
+
+            // 短暫延遲後重置
+            setTimeout(() => {
+                flash.style.opacity = "0";
+                msg.style.opacity = "0";
+                msg.style.transform = "translate(-50%, -50%) scale(0.5)";
+                
+                resetPot(); // 清空鍋子
+                nextOrder(); // 下一單
+            }, 600);
+        }
+
+    </script>
+</body>
+</html>
